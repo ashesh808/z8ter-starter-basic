@@ -1,130 +1,170 @@
-# Z8ter.py
+# Z8ter Starter
 
-**Z8ter** is a lightweight, Laravel-inspired full-stack Python web framework built on [Starlette], designed for rapid development with tight integration between backend logic and frontend templates—plus small client-side “islands” where they make sense.
+A minimal starter template for building web apps with **Z8ter (Starlette + Jinja2 + HTMX-friendly)**, **TypeScript**, and **Tailwind v4 + DaisyUI**.
 
----
-
-## ✨ Features (Current)
-
-### 1) File-Based Views (SSR)
-- Files under `views/` become routes automatically.
-- Each view pairs Python logic with a Jinja template in `templates/`.
-- A stable `page_id` (derived from `views/` path) is injected into templates and used by the frontend loader to hydrate per-page JS.
-
-### 2) Jinja2 Templating
-- Template inheritance with `{% extends %}` / `{% block %}`.
-- Templates live in `templates/` (default extension: `.jinja`).
-
-### 3) Small CSR “Islands”
-- A tiny client router lazy-loads `/static/js/pages/<page_id>.js` and runs its default export.
-- Great for interactive bits (theme toggles, pings, clipboard, etc.) without going full SPA.
-
-### 4) Decorator-Driven APIs
-- Classes under `api/` subclass `API` and register endpoints with a decorator.
-- Each class mounts under `/api/<id>` (derived from module path).
-
-> Example shape (conceptual):
-> ```
-> api/hello.py      →  /api/hello
-> views/about.py    →  /about
-> templates/about.jinja + static/js/pages/about.js (island)
-> ```
+* Server: Python (ASGI/Starlette) via **Z8ter**
+* UI: Jinja templates (SSR) with optional per‑page TS modules
+* Styling: Tailwind v4 + DaisyUI
+* DX: One command to run server + CSS + TS watchers
 
 ---
 
-## 🚀 Getting Started
+## Quickstart
 
-### Prerequisites
-- Python 3.11+ and `pip`
-- Node 18+ and `npm`
+### 1) Prerequisites
 
-### Install & Run (dev)
+* **Python** 3.10+ (3.11+ recommended)
+* **Node.js** 18+ and **npm**
+* macOS, Linux, or Windows (PowerShell)
+
+### 2) Clone this template
+
 ```bash
-# 1) Python deps (in a venv)
+# Option A: Use GitHub “Use this template” → create repo → then:
+git clone https://github.com/<your-username>/<your-new-repo>.git
+cd <your-new-repo>
+
+# Option B: Direct clone this repo (for quick testing)
+git clone https://github.com/ashesh808/z8ter-starter myapp
+cd myapp
+```
+
+### 2) Python setup
+
+```bash
+# create and activate a virtual environment (recommended)
 python -m venv .venv
-source .venv/bin/activate        # Windows: .\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt  # or: pip install -e .
+# macOS/Linux
+source .venv/bin/activate
+# Windows (PowerShell)
+.venv\Scripts\Activate.ps1
 
-# 2) Frontend deps
+# install Z8ter and friends
+pip install --upgrade pip
+pip install z8ter==0.1.2
+```
+
+### 3) Node setup
+
+```bash
 npm install
+```
 
-# 3) Dev server(s)
+### 4) Run everything (server + CSS + TS)
+
+```bash
 npm run dev
-````
+```
 
-> `npm run dev` runs the dev workflow (backend + assets). Check the terminal for the local URL.
+Open your browser to:
+
+* App: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+* Hello API: [http://127.0.0.1:8000/api/hello/](http://127.0.0.1:8000/api/hello/)  (see “API endpoints” below)
+
+> The `dev` script runs 3 processes concurrently:
+>
+> * **CSS**: Tailwind CLI → `static/css/output.css`
+> * **TS**: TypeScript compiler → `static/js/...`
+> * **Server**: `z8 run dev` (Z8ter dev server with reload)
 
 ---
 
-## 📁 Project Structure
+## What’s inside
 
 ```
-.
-├─ api/                     # API classes (@API.endpoint)
-│  └─ hello.py
-├─ views/                   # File-based pages (SSR)
-│  └─ index.py
-├─ templates/               # Jinja templates
-│  ├─ base.jinja
-│  └─ index.jinja
-├─ static/
-│  └─ js/
-│     └─ pages/             # Per-page islands: about.js, app/home.js, ...
-│        └─ common.js
-├─ z8ter/                   # Framework core (Page, API, router)
-└─ main.py                  # App entrypoint
+api/
+  __init__.py
+  hello.py                  # class-based API, returns JSON
+src/css/
+  app.css                   # Tailwind v4 + DaisyUI + @source globs
+ts/
+  app.ts                    # page loader (dynamic imports)
+  page/
+    index.ts                # “/” page script
+    about.ts                # “/about” page script
+views/
+  app/base.jinja            # base layout; embeds /static/js/app.js
+  home.html                 # SSR page for "/"
+  about.html                # SSR page for "/about"
+static/
+  css/                      # build output (Tailwind)
+  js/                       # build output (TypeScript)
+  img/
+  favicon/
+.gitignore
+package.json
+tsconfig.json
 ```
+
+### How pages work
+
+* Server renders a view (e.g., `views/home.html`) using `base.jinja`.
+* `base.jinja` sets `<body data-page="{{ page_id }}">`.
+* `ts/app.ts` reads `data-page` and **dynamically imports** `/static/js/pages/<pageId>.js`.
+
+  * Example: Home page → `pageId="home"` → loads `/static/js/pages/home.js`.
+  * We also load `common.js` if present for site‑wide code.
+
+> In the starter, we wire `index` and `about` as examples. When you add a new view, create a matching `ts/page/<name>.ts`.
 
 ---
 
-## 🧩 Usage Examples
+## API endpoints
 
-### View + Template (SSR)
-
-```jinja
-{# templates/index.jinja #}
-{% extends "base.jinja" %}
-{% block content %}
-  <h1>{{ title }}</h1>
-  <div id="api-response"></div>
-{% endblock %}
-```
-
-### Client Island (runs when `page_id` matches)
-
-```ts
-// static/js/pages/common.ts (or a specific page module)
-export default async function init() {
-  // hydrate interactive bits, fetch data, etc.
-}
-```
-
-### Minimal API Class
+`api/hello.py` defines a class‑based API with Z8ter’s `API` helper:
 
 ```python
-# api/hello.py
 from z8ter.api import API
+from z8ter.responses import JSONResponse
+from z8ter.requests import Request
 
 class Hello(API):
-    @API.endpoint("GET", "/hello")
-    async def hello(self, request):
-        return {"ok": True, "message": "Hello from Z8ter"}
+    @API.endpoint("GET", "/")
+    async def send_hello(self, request: Request) -> JSONResponse:
+        return JSONResponse({"message": "Hello from the API!"}, 200)
+```
+
+By default (given Z8ter’s route builders), this mounts at **`/api/hello/`**.
+Test it:
+
+```bash
+curl http://127.0.0.1:8000/api/hello/
+# {"message":"Hello from the API!"}
 ```
 
 ---
 
-## 🛣️ Planned
+## Build for production
 
-* **CLI scaffolding**: `z8 new`, `z8 dev`, `z8 create_page <name>`
-* **Auth scaffolding**: login/register/logout + session helpers
-* **Stripe integration**: pricing page, checkout routes, webhooks
-* **DB adapters**: SQLite default, Postgres option
-* **HTMX + Tailwind/DaisyUI** polish out of the box
+```bash
+# 1) Build static assets
+npm run build
+#   - Tailwind → static/css/output.css
+#   - TypeScript → static/js/...
+
+# 2) Run the server (one of):
+z8 run            # or `z8 run --host 0.0.0.0 --port 8000`
+# or uvicorn directly if you expose your ASGI app
+# uvicorn yourmodule:app --host 0.0.0.0 --port 8000
+```
+
+Deploy behind Nginx/Caddy/Traefik as you normally would for an ASGI app.
 
 ---
 
-## 🧠 Philosophy
+## Customize
 
-* Conventions over configuration
-* SSR-first with tiny CSR islands
-* Small surface area; sharp, pragmatic tools
+* **Add a new page**
+
+  1. Create `views/<name>.html` (extends `app/base.jinja`)
+  2. Add `ts/page/<name>.ts` (export default function)
+  3. Link to it from your templates
+
+* **Add site‑wide JS**
+  Create `ts/page/common.ts`. It will auto‑load for all pages.
+
+* **Add styles**
+  Edit `src/css/app.css`. Tailwind v4 + DaisyUI are pre‑enabled.
+
+* **Add new API**
+  Create another API class in `api/…` similar to `Hello` and rely on Z8ter’s route builder (already integrated in the framework).
