@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="luxury">
+<html lang="en" data-theme="cooperate">
   <head>
     <meta charset="UTF-8" />
     <title>Z8ter</title>
@@ -25,14 +25,12 @@
     </style>
   </head>
   <body class="bg-base-100 text-base-content" data-page="{{ page_id|default('default') }}">
-    {% include "components/header.jinja" %}
+  {% from "server-components/general.jinja" import Header, Footer %}
+    {{ Header() }}
     <main class="flex-1 max-w-4xl mx-auto px-6 pt-24 pb-24 w-full">
       {% block content %}{% endblock %}
     </main>
-    {% include "components/footer.jinja" %}
-
-    <!-- Global JS -->
-    <script type="module"  src="{{ url_for('static', filename='js/app.js') }}"></script>
-    
+    {{ Footer() }}
+    {{ vite_script_tag("src/ts/app.ts") }}
   </body>
 </html>
