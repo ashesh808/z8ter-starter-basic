@@ -1,0 +1,16 @@
+{% extends "base.jinja" %}
+{% block content %}
+{% from "server-components/tailwind.jinja" import h1 %}
+<section class="card bg-base-200">
+  <div class="card-body">
+    {{ h1("About Z8ter") }}
+    <p>
+      Z8ter combines async Python, server-rendered Jinja templates, and small
+      interactive components built with Solid and TypeScript.
+    </p>
+    <div class="card-actions mt-4">
+      <a class="btn btn-primary" href="/">Back to home</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

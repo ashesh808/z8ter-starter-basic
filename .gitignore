@@ -1,6 +1,7 @@
 .mypy_cache
 .env
 venv
+.venv/
 .vscode
 dist
 __pycache__/
