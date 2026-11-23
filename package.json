@@ -1,13 +1,13 @@
 {
   "devDependencies": {
-    "@tailwindcss/cli": "^4.3.3",
+    "@tailwindcss/cli": "^4.3.5",
     "@types/node": "^24.13.3",
     "concurrently": "^8.2.2",
-    "daisyui": "^5.7.28",
+    "daisyui": "^5.8.1",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
     "vite": "^7.3.6",
-    "vite-plugin-solid": "^2.11.14"
+    "vite-plugin-solid": "^2.11.17"
   },
   "scripts": {
     "dev:css": "npx @tailwindcss/cli -i src/css/app.css -o static/css/output.css -w",
